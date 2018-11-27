@@ -91,11 +91,69 @@ sugar_pres = spsample(sugar_poly, n = 1e2, "random")
 ```
 
 Plot the spatial polygons for each rop type and also plot the random points that were generated for each 
+
+
 ```{r}
-plot(sugar_poly)
-points(sugar_pres, pch = 3)
+plot(aqua_poly)
+points(aqua_pres, pch = 3)
+title("Aquaculture")
+
+plot(banana_poly)
+points(banana_pres, pch = 3)
+title("Banana")
+
+plot(coffee_poly)
+points(coffee_pres, pch = 3)
+title("Coffee")
+
+plot(dairy_poly)
+points(dairy_pres, pch = 3)
+title("Dairy")
+
+plot(divcrop_poly)
+points(divcrop_pres, pch = 3)
+title("Diversified Crops")
+
+plot(flowers_poly)
+points(flowers_pres, pch = 3)
+title("Flowers")
+
+# The code hangs on the forestry plot for some reason but runs at reasonable speed for all other crop types
+plot(forestry_poly)
+points(forestry_pres, pch = 3)
+title("Commercial Forestry")
+
+plot(macnuts_poly)
+points(macnuts_pres, pch = 3)
+title("Macadamia Nuts")
+
+plot(papaya_poly)
+points(papaya_pres, pch = 3)
+title("Papaya")
 
 plot(pasture_poly)
 points(pasture_pres, pch = 3)
-  
+title("Pasture")
+
+plot(pineapple_poly)
+points(pineapple_pres, pch = 3)
+title("Pineapple")
+
+plot(seeds_poly)
+points(seeds_pres, pch = 3)
+title("Seeds")
+
+plot(sugar_poly)
+points(sugar_pres, pch = 3)
+title("Sugar")
+
 ```
+
+## 6. Create shapes for the background (absence) points
+
+## 7. Condition background for each crop type
+
+Use information on suitable temperature, elevation, soil type, precipitation, and proximity to streams or other water sources to determine the suitability of different swaths of land
+
+There may not be any data on spring locations which could provide a sufficient water supply in otherwise unsuitable land for crops that have higher water demand
+
