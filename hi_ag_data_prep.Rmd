@@ -5,6 +5,7 @@ date: "11/26/2018"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -23,6 +24,8 @@ library(PBSmapping) # for GIS-like geospatial object manipulation and analysis i
 library(sp)
 library(tidyverse)
 library(ggspatial)
+library(rgeos)
+library(RColorBrewer)
 ```
 
 The shapefile folder was included in the hawaii-agriculture GitHub repository as a zip file. Once the repo is forked, one should be able to unzip the file which will produce a folder containing the shapefile and all of its dependencies. 
@@ -66,6 +69,27 @@ fruits_poly = subset(hi_ag_proj, hi_ag_proj@data$CropCatego == "Tropical Fruits"
 
 ```
 
+```{r}
+aqua_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Aquaculture")
+no_banana_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Banana")
+coffee_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Coffee")
+dairy_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Dairy")
+divcrop_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Diversified Crop")
+flowers_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Flowers / Foliage / Landscape")
+forestry_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Commercial Forestry")
+macnuts_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Macadamia Nuts")
+papaya_out= subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Papaya")
+pasture_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Pasture")
+pineapple_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Pineapple")
+seeds_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Seed Production")
+sugar_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Sugar")
+taro_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Taro")
+fruits_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Tropical Fruits")
+
+
+```
+
+
 ## 5. Generate random presence points for each crop
 
 The maximum entropy model that will be used to analyze future crop distributions requires random presence points where fields containing each crop are currently located. 
@@ -88,6 +112,14 @@ seeds_pres = spsample(seeds_poly, n = 1e2, "random")
 sugar_pres = spsample(sugar_poly, n = 1e2, "random")
 
 
+```
+
+Extract the coordinates of the presence points and insert them into a data frame
+```{r}
+sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135")
+sugar_pres_df = as.data.frame(sugar_pres_deg@coords) # projected data frame already in meters
+
+cbind(species = "sugar_presence", sugar_pres_df)
 ```
 
 Plot the spatial polygons for each rop type and also plot the random points that were generated for each 
@@ -119,9 +151,9 @@ points(flowers_pres, pch = 3)
 title("Flowers")
 
 # The code hangs on the forestry plot for some reason but runs at reasonable speed for all other crop types
-plot(forestry_poly)
-points(forestry_pres, pch = 3)
-title("Commercial Forestry")
+# plot(forestry_poly)
+# points(forestry_pres, pch = 3)
+#title("Commercial Forestry")
 
 plot(macnuts_poly)
 points(macnuts_pres, pch = 3)
@@ -151,9 +183,46 @@ title("Sugar")
 
 ## 6. Create shapes for the background (absence) points
 
-## 7. Condition background for each crop type
+Start by reading in the polygons for state land use
+```{r}
+land_use_base <- readOGR("slud.shp") # Large SpatialPolygonsDataFrame
+
+land_use_proj <- spTransform(land_use_base, CRS("+proj=utm +ellps=GRS80 +datum=NAD83"))
+```
+
+Create a subset of the land use polygons that excludes the urban land uses 
+```{r}
+conservation_poly = subset(land_use_proj, land_use_proj@data$LUDCODE == "C")
+rural_poly = subset(land_use_proj, land_use_proj@data$LUDCODE == "R")
+
+cons_rural = rbind(conservation_poly, rural_poly)
+
+```
+
+```{r}
+colnames(cons_rural@data)[2] = "CropCatego"
+colnames(cons_rural@data)[3] = "Island"
+colnames(cons_rural@data)[4] = "Acrage"
+
+```
+
+
+```{r}
+no_sugar = rbind(cons_rural, sugar_out)
+sugar_back = spsample(no_sugar, n = 1e2, "random")
+sugar_back_deg = spTransform(sugar_back,"+init=epsg:4135")
+sugar_back_df = as.data.frame(sugar_back_deg@coords)
+cbind(species = "sugar_background", sugar_back_df)
+```
+
+```{r}
+presence_sugar = write_csv(sugar_pres_df, "presence_sugar.csv")
+background_sugar = write_csv(sugar_back_df, "background_sugar.csv")
+```
+
+
+# 7. Condition background for each crop type
 
 Use information on suitable temperature, elevation, soil type, precipitation, and proximity to streams or other water sources to determine the suitability of different swaths of land
 
 There may not be any data on spring locations which could provide a sufficient water supply in otherwise unsuitable land for crops that have higher water demand
-
