@@ -116,7 +116,8 @@ sugar_pres = spsample(sugar_poly, n = 1e2, "random")
 
 Extract the coordinates of the presence points and insert them into a data frame
 ```{r}
-sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135")
+# change from projection to degrees based on EPSG 4135. Found at: spatialreference.org/ref/epsg/4135/
+sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135") 
 sugar_pres_df = as.data.frame(sugar_pres_deg@coords) # projected data frame already in meters
 
 cbind(species = "sugar_presence", sugar_pres_df)
