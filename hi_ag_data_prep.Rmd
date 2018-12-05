@@ -26,6 +26,8 @@ library(tidyverse)
 library(ggspatial)
 library(rgeos)
 library(RColorBrewer)
+library(raster)
+library(SDMTools) # for writing ascii files
 ```
 
 The shapefile folder was included in the hawaii-agriculture GitHub repository as a zip file. Once the repo is forked, one should be able to unzip the file which will produce a folder containing the shapefile and all of its dependencies. 
@@ -45,6 +47,18 @@ Transform the polygons that were read in as unprojected geographic coordinates t
 ```{r}
 hi_ag_proj <- spTransform(hi_ag_base, CRS("+proj=utm +ellps=GRS80 +datum=NAD83"))
 ```
+
+```{r}
+x_extent<- c(-2552966, -1944718)
+y_extent <- c(17337537, 17660754)
+extent_coords <- cbind(x_extent, y_extent)
+extent_points <- SpatialPoints(extent_coords, CRS("+proj=utm +ellps=GRS80 +datum=NAD83"))
+
+extent_points_deg = spTransform(extent_points, "+init=epsg:4135")
+```
+
+The data extent represented by the points is lat (19.6, 21.4) long (-154.5, -160.2). This bounding box doesn't include all of the major Hawaiian Islands.
+The extent specified in the ArcMap model used to convert World clim data from raster(tif) to ascii is lat (18.5, 23), lon (-161, -154.5)
 
 ## 4. Subset the field shapes by crop category
 
@@ -97,19 +111,19 @@ The maximum entropy model that will be used to analyze future crop distributions
 ```{r}
 # Should the number of random presence points selected vary with the total area of each crop type? 
 
-aqua_pres = spsample(aqua_poly, n = 1e2, "random")
-banana_pres = spsample(banana_poly, n = 1e2, "random")
-coffee_pres = spsample(coffee_poly, n = 1e2, "random")
-dairy_pres = spsample(dairy_poly, n = 1e2, "random")
-divcrop_pres = spsample(divcrop_poly, n = 1e2, "random")
-flowers_pres = spsample(flowers_poly, n = 1e2, "random")
-forestry_pres = spsample(forestry_poly, n = 1e2, "random")
-macnuts_pres = spsample(macnuts_poly, n = 1e2, "random")
-papaya_pres = spsample(papaya_poly, n = 1e2, "random")
-pasture_pres = spsample(pasture_poly, n = 1e2, "random")
-pineapple_pres = spsample(pineapple_poly, n = 1e2, "random")
-seeds_pres = spsample(seeds_poly, n = 1e2, "random")
-sugar_pres = spsample(sugar_poly, n = 1e2, "random")
+aqua_pres = spsample(aqua_poly, n = 1e4, "random")
+banana_pres = spsample(banana_poly, n = 1e4, "random")
+coffee_pres = spsample(coffee_poly, n = 1e4, "random")
+dairy_pres = spsample(dairy_poly, n = 1e4, "random")
+divcrop_pres = spsample(divcrop_poly, n = 1e4, "random")
+flowers_pres = spsample(flowers_poly, n = 1e4, "random")
+forestry_pres = spsample(forestry_poly, n = 1e4, "random")
+macnuts_pres = spsample(macnuts_poly, n = 1e4, "random")
+papaya_pres = spsample(papaya_poly, n = 1e4, "random")
+pasture_pres = spsample(pasture_poly, n = 1e4, "random")
+pineapple_pres = spsample(pineapple_poly, n = 1e4, "random")
+seeds_pres = spsample(seeds_poly, n = 1e4, "random")
+sugar_pres = spsample(sugar_poly, n = 1e4, "random")
 
 
 ```
@@ -209,7 +223,7 @@ colnames(cons_rural@data)[4] = "Acrage"
 
 ```{r}
 no_sugar = rbind(cons_rural, sugar_out)
-sugar_back = spsample(no_sugar, n = 1e2, "random")
+sugar_back = spsample(no_sugar, n = 1e4, "random")
 sugar_back_deg = spTransform(sugar_back,"+init=epsg:4135")
 sugar_back_df = as.data.frame(sugar_back_deg@coords)
 cbind(species = "sugar_background", sugar_back_df)
@@ -226,3 +240,30 @@ background_sugar = write_csv(sugar_back_df, "background_sugar.csv")
 Use information on suitable temperature, elevation, soil type, precipitation, and proximity to streams or other water sources to determine the suitability of different swaths of land
 
 There may not be any data on spring locations which could provide a sufficient water supply in otherwise unsuitable land for crops that have higher water demand
+
+
+# 8. Try to import worldclim data using raster library
+```{r}
+tmin = getData('worldclim', var='tmin', res=0.5, lon=-156, lat = 20)
+
+```
+```{r}
+tmin1 = dataframe2asc(tmin@)
+```
+
+```{r}
+plot(tmin, 1)
+```
+
+```{r}
+df1 <- read.table("pre6190_l7.asc", skip=6, header = FALSE, sep = "\t")
+df1[df1 == -9999] <- 0
+df2 <-as.raster(as.matrix(df1))
+
+class(df2)
+```
+
+```{r}
+plot(df2)
+```
+
