@@ -111,29 +111,39 @@ The maximum entropy model that will be used to analyze future crop distributions
 ```{r}
 # Should the number of random presence points selected vary with the total area of each crop type? 
 
-aqua_pres = spsample(aqua_poly, n = 1e4, "random")
-banana_pres = spsample(banana_poly, n = 1e4, "random")
-coffee_pres = spsample(coffee_poly, n = 1e4, "random")
-dairy_pres = spsample(dairy_poly, n = 1e4, "random")
-divcrop_pres = spsample(divcrop_poly, n = 1e4, "random")
-flowers_pres = spsample(flowers_poly, n = 1e4, "random")
-forestry_pres = spsample(forestry_poly, n = 1e4, "random")
-macnuts_pres = spsample(macnuts_poly, n = 1e4, "random")
-papaya_pres = spsample(papaya_poly, n = 1e4, "random")
-pasture_pres = spsample(pasture_poly, n = 1e4, "random")
-pineapple_pres = spsample(pineapple_poly, n = 1e4, "random")
-seeds_pres = spsample(seeds_poly, n = 1e4, "random")
-sugar_pres = spsample(sugar_poly, n = 1e4, "random")
+aqua_pres = spsample(aqua_poly, n = 1e3, "random")
+banana_pres = spsample(banana_poly, n = 1e3, "random")
+coffee_pres = spsample(coffee_poly, n = 1e3, "random")
+dairy_pres = spsample(dairy_poly, n = 1e3, "random")
+divcrop_pres = spsample(divcrop_poly, n = 1e3, "random")
+flowers_pres = spsample(flowers_poly, n = 1e3, "random")
+forestry_pres = spsample(forestry_poly, n = 1e3, "random")
+macnuts_pres = spsample(macnuts_poly, n = 1e3, "random")
+papaya_pres = spsample(papaya_poly, n = 1e3, "random")
+pasture_pres = spsample(pasture_poly, n = 1e3, "random")
+pineapple_pres = spsample(pineapple_poly, n = 1e3, "random")
+seeds_pres = spsample(seeds_poly, n = 1e3, "random")
+sugar_pres = spsample(sugar_poly, n = 1e3, "random")
 
 
 ```
 
 Extract the coordinates of the presence points and insert them into a data frame
 ```{r}
+divcrop_pres_deg = spTransform(divcrop_pres,"+init=epsg:4135")
 sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135")
+
+divcrop_pres_df = as.data.frame(divcrop_pres_deg@coords)
 sugar_pres_df = as.data.frame(sugar_pres_deg@coords) # projected data frame already in meters
 
-cbind(species = "sugar_presence", sugar_pres_df)
+divcrop_pres_df$species <- "divcrop_presence"
+sugar_pres_df$species <- "sugar_presence"
+
+#cbind(species = "divcrop_presence", divcrop_pres_df)
+#cbind(species = "sugar_presence", sugar_pres_df)
+
+presence_hicrop = rbind(divcrop_pres_df, sugar_pres_df)
+presence_hicrop <- presence_hicrop[colnames(presence_hicrop)[c(3,1,2)]]
 ```
 
 Plot the spatial polygons for each rop type and also plot the random points that were generated for each 
@@ -223,15 +233,32 @@ colnames(cons_rural@data)[4] = "Acrage"
 
 ```{r}
 no_sugar = rbind(cons_rural, sugar_out)
-sugar_back = spsample(no_sugar, n = 1e4, "random")
+no_divcrop = rbind(cons_rural, divcrop_out)
+
+# sample random points from the background area
+divcrop_back = spsample(no_divcrop, n = 1e3, "random")
+sugar_back = spsample(no_sugar, n = 1e3, "random")
+
+# convert spatial point coordinates to degrees
+divcrop_back_deg = spTransform(divcrop_back,"+init=epsg:4135")
 sugar_back_deg = spTransform(sugar_back,"+init=epsg:4135")
+
+
+divcrop_back_df = as.data.frame(divcrop_back_deg@coords)
 sugar_back_df = as.data.frame(sugar_back_deg@coords)
-cbind(species = "sugar_background", sugar_back_df)
+
+divcrop_back_df$species <- "divcrop_background"
+sugar_back_df$species <- "sugar_background"
+
+
+background_hicrop = rbind(divcrop_back_df, sugar_back_df)
+background_hicrop <- background_hicrop[colnames(background_hicrop)[c(3,1,2)]]
+
 ```
 
 ```{r}
-presence_sugar = write_csv(sugar_pres_df, "presence_sugar.csv")
-background_sugar = write_csv(sugar_back_df, "background_sugar.csv")
+write_csv(presence_hicrop, "presence_hicrop.csv")
+write_csv(background_hicrop, "background_hicrop.csv")
 ```
 
 
@@ -248,7 +275,7 @@ tmin = getData('worldclim', var='tmin', res=0.5, lon=-156, lat = 20)
 
 ```
 ```{r}
-tmin1 = dataframe2asc(tmin@)
+# tmin1 = dataframe2asc(tmin)
 ```
 
 ```{r}
