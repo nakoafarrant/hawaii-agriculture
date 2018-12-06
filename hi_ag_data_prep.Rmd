@@ -60,6 +60,8 @@ extent_points_deg = spTransform(extent_points, "+init=epsg:4135")
 The data extent represented by the points is lat (19.6, 21.4) long (-154.5, -160.2). This bounding box doesn't include all of the major Hawaiian Islands.
 The extent specified in the ArcMap model used to convert World clim data from raster(tif) to ascii is lat (18.5, 23), lon (-161, -154.5)
 
+When running MaxEnt, there seems to be data missing just west of Kona International Airport for precipitation 1 from world clim data. All of the missing points that I can see seem to be in close proximity and there are at least 75 of them
+
 ## 4. Subset the field shapes by crop category
 
 This isolates the fields based on the crop type that they were labeled with
