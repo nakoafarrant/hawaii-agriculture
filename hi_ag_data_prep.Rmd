@@ -85,7 +85,7 @@ fruits_poly = subset(hi_ag_proj, hi_ag_proj@data$CropCatego == "Tropical Fruits"
 
 ```{r}
 aqua_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Aquaculture")
-no_banana_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Banana")
+banana_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Banana")
 coffee_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Coffee")
 dairy_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Dairy")
 divcrop_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Diversified Crop")
@@ -130,19 +130,52 @@ sugar_pres = spsample(sugar_poly, n = 1e3, "random")
 
 Extract the coordinates of the presence points and insert them into a data frame
 ```{r}
+aqua_pres_deg = spTransform(aqua_pres,"+init=epsg:4135")
+banana_pres_deg = spTransform(banana_pres,"+init=epsg:4135")
+coffee_pres_deg = spTransform(coffee_pres,"+init=epsg:4135")
+dairy_pres_deg = spTransform(dairy_pres,"+init=epsg:4135")
 divcrop_pres_deg = spTransform(divcrop_pres,"+init=epsg:4135")
+flowers_pres_deg = spTransform(flowers_pres,"+init=epsg:4135")
+forestry_pres_deg = spTransform(forestry_pres,"+init=epsg:4135")
+macnuts_pres_deg = spTransform(macnuts_pres,"+init=epsg:4135")
+papaya_pres_deg = spTransform(papaya_pres,"+init=epsg:4135")
+pasture_pres_deg = spTransform(pasture_pres,"+init=epsg:4135")
+pineapple_pres_deg = spTransform(pineapple_pres,"+init=epsg:4135")
+seeds_pres_deg = spTransform(seeds_pres,"+init=epsg:4135")
 sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135")
 
+aqua_pres_df = as.data.frame(aqua_pres_deg@coords)
+banana_pres_df = as.data.frame(banana_pres_deg@coords)
+coffee_pres_df = as.data.frame(coffee_pres_deg@coords)
+dairy_pres_df = as.data.frame(dairy_pres_deg@coords)
 divcrop_pres_df = as.data.frame(divcrop_pres_deg@coords)
+flowers_pres_df = as.data.frame(flowers_pres_deg@coords)
+forestry_pres_df = as.data.frame(forestry_pres_deg@coords)
+macnuts_pres_df = as.data.frame(macnuts_pres_deg@coords)
+papaya_pres_df = as.data.frame(papaya_pres_deg@coords)
+pasture_pres_df = as.data.frame(pasture_pres_deg@coords)
+pineapple_pres_df = as.data.frame(pineapple_pres_deg@coords)
+seeds_pres_df = as.data.frame(seeds_pres_deg@coords)
 sugar_pres_df = as.data.frame(sugar_pres_deg@coords) # projected data frame already in meters
 
+aqua_pres_df$species <- "aqua_presence"
+banana_pres_df$species <- "banana_presence"
+coffee_pres_df$species <- "coffee_presence"
+dairy_pres_df$species <- "dairy_presence"
 divcrop_pres_df$species <- "divcrop_presence"
+flowers_pres_df$species <- "flowers_presence"
+forestry_pres_df$species <- "forestry_presence"
+macnuts_pres_df$species <- "macnuts_presence"
+papaya_pres_df$species <- "papaya_presence"
+pasture_pres_df$species <- "pasture_presence"
+pineapple_pres_df$species <- "pineapple_presence"
+seeds_pres_df$species <- "seeds_presence"
 sugar_pres_df$species <- "sugar_presence"
 
-#cbind(species = "divcrop_presence", divcrop_pres_df)
-#cbind(species = "sugar_presence", sugar_pres_df)
+#cbind(species = "divcrop_presence", divcrop_pres_df) - alternative method that adds column "species as a factor"
 
-presence_hicrop = rbind(divcrop_pres_df, sugar_pres_df)
+
+presence_hicrop = rbind(aqua_pres_df, banana_pres_df, coffee_pres_df, dairy_pres_df, divcrop_pres_df, flowers_pres_df, forestry_pres_df, macnuts_pres_df, papaya_pres_df, pasture_pres_df, pineapple_pres_df, seeds_pres_df, sugar_pres_df)
 presence_hicrop <- presence_hicrop[colnames(presence_hicrop)[c(3,1,2)]]
 ```
 
@@ -232,26 +265,82 @@ colnames(cons_rural@data)[4] = "Acrage"
 
 
 ```{r}
-no_sugar = rbind(cons_rural, sugar_out)
+no_aqua = rbind(cons_rural, aqua_out)
+no_banana = rbind(cons_rural, banana_out)
+no_coffee = rbind(cons_rural, coffee_out)
+no_dairy = rbind(cons_rural, dairy_out)
 no_divcrop = rbind(cons_rural, divcrop_out)
+no_flowers = rbind(cons_rural, flowers_out)
+no_forestry = rbind(cons_rural, forestry_out)
+no_macnuts = rbind(cons_rural, macnuts_out)
+no_papaya = rbind(cons_rural, papaya_out)
+no_pasture = rbind(cons_rural, pasture_out)
+no_pineapple = rbind(cons_rural, pineapple_out)
+no_seeds= rbind(cons_rural, seeds_out)
+no_sugar = rbind(cons_rural, sugar_out)
 
 # sample random points from the background area
+aqua_back = spsample(no_aqua, n = 1e3, "random")
+banana_back = spsample(no_banana, n = 1e3, "random")
+coffee_back = spsample(no_coffee, n = 1e3, "random")
+dairy_back = spsample(no_dairy, n = 1e3, "random")
 divcrop_back = spsample(no_divcrop, n = 1e3, "random")
+flowers_back = spsample(no_flowers, n = 1e3, "random")
+forestry_back = spsample(no_forestry, n = 1e3, "random")
+macnuts_back = spsample(no_macnuts, n = 1e3, "random")
+papaya_back = spsample(no_papaya, n = 1e3, "random")
+pasture_back = spsample(no_pasture, n = 1e3, "random")
+pineapple_back = spsample(no_pineapple, n = 1e3, "random")
+seeds_back = spsample(no_seeds, n = 1e3, "random")
 sugar_back = spsample(no_sugar, n = 1e3, "random")
 
+
 # convert spatial point coordinates to degrees
+aqua_back_deg = spTransform(aqua_back,"+init=epsg:4135")
+banana_back_deg = spTransform(banana_back,"+init=epsg:4135")
+coffee_back_deg = spTransform(coffee_back,"+init=epsg:4135")
+dairy_back_deg = spTransform(dairy_back,"+init=epsg:4135")
 divcrop_back_deg = spTransform(divcrop_back,"+init=epsg:4135")
+flowers_back_deg = spTransform(flowers_back,"+init=epsg:4135")
+forestry_back_deg = spTransform(forestry_back,"+init=epsg:4135")
+macnuts_back_deg = spTransform(macnuts_back,"+init=epsg:4135")
+papaya_back_deg = spTransform(papaya_back,"+init=epsg:4135")
+pasture_back_deg = spTransform(pasture_back,"+init=epsg:4135")
+pineapple_back_deg = spTransform(pineapple_back,"+init=epsg:4135")
+seeds_back_deg = spTransform(seeds_back,"+init=epsg:4135")
 sugar_back_deg = spTransform(sugar_back,"+init=epsg:4135")
 
-
+aqua_back_df = as.data.frame(aqua_back_deg@coords)
+banana_back_df = as.data.frame(banana_back_deg@coords)
+coffee_back_df = as.data.frame(coffee_back_deg@coords)
+dairy_back_df = as.data.frame(dairy_back_deg@coords)
 divcrop_back_df = as.data.frame(divcrop_back_deg@coords)
+flowers_back_df = as.data.frame(flowers_back_deg@coords)
+forestry_back_df = as.data.frame(forestry_back_deg@coords)
+macnuts_back_df = as.data.frame(macnuts_back_deg@coords)
+papaya_back_df = as.data.frame(papaya_back_deg@coords)
+pasture_back_df = as.data.frame(pasture_back_deg@coords)
+pineapple_back_df = as.data.frame(pineapple_back_deg@coords)
+seeds_back_df = as.data.frame(seeds_back_deg@coords)
 sugar_back_df = as.data.frame(sugar_back_deg@coords)
 
+
+aqua_back_df$species <- "aqua_background"
+banana_back_df$species <- "banana_background"
+coffee_back_df$species <- "coffee_background"
+dairy_back_df$species <- "dairy_background"
 divcrop_back_df$species <- "divcrop_background"
+flowers_back_df$species <- "flowers_background"
+forestry_back_df$species <- "forestry_background"
+macnuts_back_df$species <- "macnuts_background"
+papaya_back_df$species <- "papaya_background"
+pasture_back_df$species <- "pasture_background"
+pineapple_back_df$species <- "pineapple_background"
+seeds_back_df$species <- "seeds_background"
 sugar_back_df$species <- "sugar_background"
 
 
-background_hicrop = rbind(divcrop_back_df, sugar_back_df)
+background_hicrop = rbind(aqua_back_df, banana_back_df, coffee_back_df, dairy_back_df, divcrop_back_df, flowers_back_df, forestry_back_df, macnuts_back_df, papaya_back_df, pasture_back_df, pineapple_back_df, seeds_back_df, sugar_back_df)
 background_hicrop <- background_hicrop[colnames(background_hicrop)[c(3,1,2)]]
 
 ```
