@@ -27,7 +27,17 @@ library(ggspatial)
 library(rgeos)
 library(RColorBrewer)
 library(raster)
-library(SDMTools) # for writing ascii files
+
+# packages needed to run maxent
+library(maxent) 
+library(dismo) 
+
+library(SDMTools) # for writing ascii files for environmental layers
+
+# Add packages for analyzing Maxent R output
+library(ROCR)
+library(vcd) 
+library(boot)
 ```
 
 The shapefile folder was included in the hawaii-agriculture GitHub repository as a zip file. Once the repo is forked, one should be able to unzip the file which will produce a folder containing the shapefile and all of its dependencies. 
@@ -282,19 +292,19 @@ no_seeds= rbind(cons_rural, seeds_out)
 no_sugar = rbind(cons_rural, sugar_out)
 
 # sample random points from the background area
-aqua_back = spsample(no_aqua, n = 1e3, "random")
-banana_back = spsample(no_banana, n = 1e3, "random")
-coffee_back = spsample(no_coffee, n = 1e3, "random")
-dairy_back = spsample(no_dairy, n = 1e3, "random")
-divcrop_back = spsample(no_divcrop, n = 1e3, "random")
-flowers_back = spsample(no_flowers, n = 1e3, "random")
-forestry_back = spsample(no_forestry, n = 1e3, "random")
-macnuts_back = spsample(no_macnuts, n = 1e3, "random")
-papaya_back = spsample(no_papaya, n = 1e3, "random")
-pasture_back = spsample(no_pasture, n = 1e3, "random")
-pineapple_back = spsample(no_pineapple, n = 1e3, "random")
-seeds_back = spsample(no_seeds, n = 1e3, "random")
-sugar_back = spsample(no_sugar, n = 1e3, "random")
+aqua_back = spsample(no_aqua, n = 1e4, "random")
+banana_back = spsample(no_banana, n = 1e4, "random")
+coffee_back = spsample(no_coffee, n = 1e4, "random")
+dairy_back = spsample(no_dairy, n = 1e4, "random")
+divcrop_back = spsample(no_divcrop, n = 1e4, "random")
+flowers_back = spsample(no_flowers, n = 1e4, "random")
+forestry_back = spsample(no_forestry, n = 1e4, "random")
+macnuts_back = spsample(no_macnuts, n = 1e4, "random")
+papaya_back = spsample(no_papaya, n = 1e4, "random")
+pasture_back = spsample(no_pasture, n = 1e4, "random")
+pineapple_back = spsample(no_pineapple, n = 1e4, "random")
+seeds_back = spsample(no_seeds, n = 1e4, "random")
+sugar_back = spsample(no_sugar, n = 1e4, "random")
 
 
 # convert spatial point coordinates to degrees
