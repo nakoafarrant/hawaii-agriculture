@@ -248,6 +248,7 @@ There may not be any data on spring locations which could provide a sufficient w
 tmin = getData('worldclim', var='tmin', res=0.5, lon=-156, lat = 20)
 
 ```
+
 ```{r}
 tmin1 = dataframe2asc(tmin@)
 ```
