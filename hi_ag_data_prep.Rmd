@@ -25,7 +25,6 @@ library(sp)
 library(tidyverse)
 library(ggspatial)
 library(rgeos)
-library(RColorBrewer)
 library(raster)
 
 # packages needed to run maxent
@@ -142,10 +141,8 @@ sugar_pres = spsample(sugar_poly, n = 1e3, "random")
 
 Extract the coordinates of the presence points and insert them into a data frame
 ```{r}
-<<<<<<< HEAD
+
 # change from projection to degrees based on EPSG 4135. Found at: spatialreference.org/ref/epsg/4135/
-sugar_pres_deg = spTransform(sugar_pres,"+init=epsg:4135") 
-=======
 aqua_pres_deg = spTransform(aqua_pres,"+init=epsg:4135")
 banana_pres_deg = spTransform(banana_pres,"+init=epsg:4135")
 coffee_pres_deg = spTransform(coffee_pres,"+init=epsg:4135")
@@ -172,7 +169,6 @@ papaya_pres_df = as.data.frame(papaya_pres_deg@coords)
 pasture_pres_df = as.data.frame(pasture_pres_deg@coords)
 pineapple_pres_df = as.data.frame(pineapple_pres_deg@coords)
 seeds_pres_df = as.data.frame(seeds_pres_deg@coords)
->>>>>>> 1ecda60bffefa688739b1276f8a1219791a7772e
 sugar_pres_df = as.data.frame(sugar_pres_deg@coords) # projected data frame already in meters
 
 aqua_pres_df$species <- "aqua_presence"
@@ -189,8 +185,6 @@ pineapple_pres_df$species <- "pineapple_presence"
 seeds_pres_df$species <- "seeds_presence"
 sugar_pres_df$species <- "sugar_presence"
 
-#cbind(species = "divcrop_presence", divcrop_pres_df) - alternative method that adds column "species as a factor"
-
 
 presence_hicrop = rbind(aqua_pres_df, banana_pres_df, coffee_pres_df, dairy_pres_df, divcrop_pres_df, flowers_pres_df, forestry_pres_df, macnuts_pres_df, papaya_pres_df, pasture_pres_df, pineapple_pres_df, seeds_pres_df, sugar_pres_df)
 presence_hicrop <- presence_hicrop[colnames(presence_hicrop)[c(3,1,2)]]
@@ -200,59 +194,9 @@ Plot the spatial polygons for each rop type and also plot the random points that
 
 
 ```{r}
-plot(aqua_poly)
-points(aqua_pres, pch = 3)
-title("Aquaculture")
-
-plot(banana_poly)
-points(banana_pres, pch = 3)
-title("Banana")
-
-plot(coffee_poly)
-points(coffee_pres, pch = 3)
-title("Coffee")
-
-plot(dairy_poly)
-points(dairy_pres, pch = 3)
-title("Dairy")
-
-plot(divcrop_poly)
-points(divcrop_pres, pch = 3)
-title("Diversified Crops")
-
-plot(flowers_poly)
-points(flowers_pres, pch = 3)
-title("Flowers")
-
-# The code hangs on the forestry plot for some reason but runs at reasonable speed for all other crop types
-# plot(forestry_poly)
-# points(forestry_pres, pch = 3)
-#title("Commercial Forestry")
-
-plot(macnuts_poly)
-points(macnuts_pres, pch = 3)
-title("Macadamia Nuts")
-
-plot(papaya_poly)
-points(papaya_pres, pch = 3)
-title("Papaya")
-
-plot(pasture_poly)
-points(pasture_pres, pch = 3)
-title("Pasture")
-
-plot(pineapple_poly)
-points(pineapple_pres, pch = 3)
-title("Pineapple")
-
-plot(seeds_poly)
-points(seeds_pres, pch = 3)
-title("Seeds")
-
-plot(sugar_poly)
-points(sugar_pres, pch = 3)
-title("Sugar")
-
+#plot(aqua_poly)
+#points(aqua_pres, pch = 3)
+#title("Aquaculture")
 ```
 
 ## 6. Create shapes for the background (absence) points
@@ -368,36 +312,24 @@ write_csv(background_hicrop, "background_hicrop.csv")
 ```
 
 
-# 7. Condition background for each crop type
 
-Use information on suitable temperature, elevation, soil type, precipitation, and proximity to streams or other water sources to determine the suitability of different swaths of land
-
-There may not be any data on spring locations which could provide a sufficient water supply in otherwise unsuitable land for crops that have higher water demand
-
-
-# 8. Try to import worldclim data using raster library
+# 7. Import worldclim data using raster library
 ```{r}
 tmin = getData('worldclim', var='tmin', res=0.5, lon=-156, lat = 20)
 
 ```
 
+# 8. Run maxent
 ```{r}
-# tmin1 = dataframe2asc(tmin)
+bg_extent = extent(cons_rural)
+
+bg <- randomPoints(tmin, n = 500, ext = bg_extent)
+plot(bg)
 ```
 
-```{r}
-plot(tmin, 1)
-```
 
-```{r}
-df1 <- read.table("pre6190_l7.asc", skip=6, header = FALSE, sep = "\t")
-df1[df1 == -9999] <- 0
-df2 <-as.raster(as.matrix(df1))
+# 9. Condition background for each crop type
 
-class(df2)
-```
+Use information on suitable temperature, elevation, soil type, precipitation, and proximity to streams or other water sources to determine the suitability of different swaths of land
 
-```{r}
-plot(df2)
-```
-
+There may not be any data on spring locations which could provide a sufficient water supply in otherwise unsuitable land for crops that have higher water demand
