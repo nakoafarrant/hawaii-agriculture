@@ -95,6 +95,19 @@ fruits_poly = subset(hi_ag_proj, hi_ag_proj@data$CropCatego == "Tropical Fruits"
 ```
 
 ```{r}
+skysat = rbind(banana_poly, divcrop_poly, papaya_poly, fruits_poly)
+skysat_deg = spTransform(skysat, "+init=epsg:4135")
+
+HIcropAOI_shape = writeOGR(obj=skysat, dsn = "~/github/hawaii-agriculture", layer="HIcropAOI", driver="ESRI Shapefile")
+```
+```{r}
+plot(skysat_deg)
+HIcropAOI_deg = writeOGR(obj=skysat_deg, dsn = "~/github/hawaii-agriculture", layer="HIcropAOI_deg", driver="ESRI Shapefile")
+
+```
+
+
+```{r}
 aqua_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Aquaculture")
 banana_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Banana")
 coffee_out = subset(hi_ag_proj, hi_ag_proj@data$CropCatego != "Coffee")
@@ -215,6 +228,8 @@ rural_poly = subset(land_use_proj, land_use_proj@data$LUDCODE == "R")
 
 cons_rural = rbind(conservation_poly, rural_poly)
 
+cons_rural_deg = spTransform(cons_rural,"+init=epsg:4135")
+
 ```
 
 ```{r}
@@ -321,7 +336,7 @@ tmin = getData('worldclim', var='tmin', res=0.5, lon=-156, lat = 20)
 
 # 8. Run maxent
 ```{r}
-bg_extent = extent(cons_rural)
+bg_extent = extent(cons_rural_deg)
 
 bg <- randomPoints(tmin, n = 500, ext = bg_extent)
 plot(bg)
